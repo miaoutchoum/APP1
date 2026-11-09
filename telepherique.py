@@ -10,106 +10,177 @@ import matplotlib.pyplot as plt
 
 
 ###  Data  ###
-L = 16                             # [m]
+# Installation
+L = 16                             # cable length [m]
 d = 15                             # [m]
 h1 = 5                             # [m]
 h2 = 4                             # [m]
-f = (d**2 + (h2-h1)**2) ** 0.5     # []
+h = h2 - h1                        # [m]
+f = (d**2 + h**2) ** 0.5           # [-]
+alpha = math.atan2(h, d)           # tan(𝜶) = h/d [rad]
 
 # Ellipse
-a = L / 2                          # []
-b = (L**2 - f**2)**0.5 / 2         # []
+a = L / 2                          # semi-major axis [-]
+b = (L**2 - f**2)**0.5 / 2         # semi-minor axis [-]
 
 # Other
-g = 9.81                           # [m/s²]
-m = 0.4                            # [kg]
+g = 9.81                           # gravity [m/s²]
+m = 0.4                            # mass of the cable car [kg]
+f_d = 0.1                          # friction coefficient [kg/s]
 
+# Simulation
+step = 0.001                       # time step dt [s]
+end = 60.0                         # duration [s]
+x_0 = 0.0                          # initial horizontal position [m]
+du_0 = 0.0                         # initial speed [m/s]
 
 
 ###  Physics code  ###
-def trajectory_equation(interval: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def trajectory_equation(interval: np.ndarray) -> np.ndarray:
     """
-    :param interval : step to draw the trajectory equation
-    :return the data of the car cable trajectories as an array:
+    :param interval : values on the u-axis [m]
+    :return v : corresponding values on the v-axis, lower branch of the ellipse [m]
     """
 
     u = interval
 
-    # Multiply every u-axis to get the correspondant value on the v-axis
-    #        np.sqrt applies √ for every value at the SAME time
-    v = -b * np.sqrt(1 - (2*u/L) ** 2)
+    # Applied to every value of u at the SAME time (NumPy vectorisation)
+    v = -b * np.sqrt(1 - (u / a) ** 2)
 
     return v
 
-def velocity_equation(interval: np.ndarray) -> list:
+def slope_equation(interval: np.ndarray) -> np.ndarray:
     """
-    :param interval : step to draw the velocity equation
-    :return speed vector:
+    :param interval : values on the u-axis [m]
+    :return v' = dv/du : slope of the trajectory in the (u, v) frame [-]
     """
-    # return dv
+
+    u = interval
+
+    return b / a**2 * u / np.sqrt(1 - (u / a) ** 2)
+
+def curvature_equation(interval: np.ndarray) -> np.ndarray:
+    """
+    :param interval : values on the u-axis [m]
+    :return v'' = d²v/du² : second derivative of the trajectory [1/m]
+    """
+
+    u = interval
+
     pass
 
-def acceleration_equation(interval: np.ndarray) -> list:
+def acceleration_equation(u: float, du: float) -> float:
     """
-    :param interval : step to draw the acceleration equation
-    :return speed vector:
+    :param u  : position on the u-axis [m]
+    :param du : speed along u, du/dt [m/s]
+    :return ddu : acceleration along u, d²u/dt² [m/s²] (final equation of Annex H2)
     """
-    # return the acceleration equation
+
     pass
+
+def velocity_equation(u: np.ndarray, du: np.ndarray) -> np.ndarray:
+    """
+    :param u  : positions on the u-axis [m]
+    :param du : speeds along u [m/s]
+    :return ds : speed of the cable car along the cable, ||dR/dt|| = sqrt(1 + v'²) |du/dt| [m/s]
+    """
+
+    pass
+
+def change_of_reference(u: np.ndarray, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """
+    :param u, v : coordinates in the ellipse frame [m]
+    :return x, y : coordinates in the real frame (origin at the foot of P1) [m]
+    """
+
+    x = d / 2 + u * math.cos(alpha) - v * math.sin(alpha)
+    y = h1 + h / 2 + u * math.sin(alpha) + v * math.cos(alpha)
+
+    return x, y
+
+def u_from_x(x_target: float) -> float:
+    """
+    :param x_target : horizontal position in the real frame [m]
+    :return u : position on the u-axis of the point of the path with this x [m]
+    """
+
+    pass
+
+
+u_min = u_from_x(0)
+u_max = u_from_x(d)
+u_0 = u_from_x(x_0)
+
+
+def simulation() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Solve the equation of motion with Euler's method.
+
+    :return t, u, du, ddu : time [s], position [m], speed [m/s] and acceleration [m/s²] along u
+    """
+    return None, None, None, None
 
 
 
 ###  Graphics code  ###
-def draw_trajectory(interval: np.ndarray, color='Black') -> None:
+def draw_trajectory(x: np.ndarray, y: np.ndarray, color='Black') -> None:
     """
-    :param interval : step to draw the trajectory equation
-    :param color : color of the trajectory equation
+    :param x, y : simulated positions [m]
+    :param color : color of the simulated positions
     :return None:
     """
 
-    # Data
-    u = interval
-    v = trajectory_equation(interval=u)
+    # Full path of the cable car, between the poles
+    u_path = np.linspace(u_min, u_max, 2001)
+    x_path, y_path = frame_change(u_path, trajectory_equation(u_path))
 
-
-    # Drawing trajectory
-    plt.plot(interval, v, color=color, label="Trajectory")
-    plt.xlabel("Length [m]")
-    plt.ylabel("Heigh [m]")
-    plt.title("Cable car")
+    plt.figure(1)
+    plt.plot(x_path, y_path, '--', color='Grey', label="Possible path (ellipse)")
+    plt.plot(x, y, color=color, label="Simulated positions")
+    plt.plot([0, d], [h1, h2], 'ko', label="Anchors P1, P2")
+    plt.plot(x[-1], y[-1], 'o', color='Red', label=f"Final position ({x[-1]:.3f}, {y[-1]:.3f})")
+    plt.xlabel("x [m]")
+    plt.ylabel("y [m]")
+    plt.title("Cable car - trajectory")
     plt.grid(True)
     plt.axis("equal")
     plt.legend()
     plt.show()
 
-def draw_velocity(interval: np.ndarray, color='Black') -> None:
+def draw_position_velocity(t: np.ndarray, x: np.ndarray, y: np.ndarray, speed: np.ndarray, color='Black') -> None:
     """
-    :param interval : step to draw the velocity equation
-    :param color : color of the velocity equation
+    :param t : time [s]
+    :param x, y : positions [m]
+    :param speed : speed along the cable [m/s]
+    :param color : color of the simulated curves
     :return None:
     """
 
-    # Data
-    u = interval
-    dv = velocity_equation(interval=u)
+    pass
 
+def draw_energy(t: np.ndarray, y: np.ndarray, speed: np.ndarray) -> None:
+    """
+    Check of the simulation: the total energy must decrease (friction)
+    and stay constant if f_d = 0.
+    :return None:
+    """
 
-    # Drawing Velocity
-    plt.plot(u, dv, color=color, label="Velocity")
-    plt.xlabel("t [s]")
-    plt.ylabel("speed [m/s]")
-    plt.title("Cable car")
-    plt.grid(True)
-    plt.axis("equal")
-    plt.legend()
-    plt.show()
+    pass
 
 
 
-step = 0.01
 
-# Create an array of every values on the u-axis
-#                                  + step is use to include the last value
-divided_interval = np.arange(-a, a + step, step)
+###  Main program  ###
+if __name__ == "__main__":
 
-draw_trajectory(interval=divided_interval, color='Blue')
+    # 1. Solve the equation of motion along u
+    t, u, du, ddu = simulation()
+
+    # 2. Back to the real frame and speed along the cable
+    v = trajectory_equation(u)
+    x, y = change_of_reference(u, v)
+    speed = velocity_equation(u, du)
+
+    # 3. Graphics
+    draw_trajectory(x, y, color='Blue')
+    draw_position_velocity(t, x, y, speed, color='Black')
