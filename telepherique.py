@@ -76,7 +76,16 @@ def acceleration_equation(u: float, du: float) -> float:
     :return ddu : acceleration along u, d²u/dt² [m/s²] (final equation of Annex H2)
     """
 
-    pass
+    dv = slope_equation(u)          # v'
+    ddv = curvature_equation(u)     # v''
+    
+    # ů = du
+    
+    courbure =  ((dv * ddv) / (1 + dv**2)) * (du**2)
+    frotement_force = (f * du) / m
+    gravity_force = ((dv * math.cos(alpha) + math.sin(alpha)) / (1 + (dv**2))) * g
+    
+    return (-1) * (courbure + frotement_force + gravity_force)
 
 def velocity_equation(u: np.ndarray, du: np.ndarray) -> np.ndarray:
     """
