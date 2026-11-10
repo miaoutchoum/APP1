@@ -67,7 +67,7 @@ def curvature_equation(interval: np.ndarray) -> np.ndarray:
 
     u = interval
 
-    pass
+    return b / a**2 * (1 - (u / a) ** 2) ** (-3 / 2)
 
 def acceleration_equation(u: float, du: float) -> float:
     """
@@ -105,7 +105,10 @@ def u_from_x(x_target: float) -> float:
     :return u : position on the u-axis of the point of the path with this x [m]
     """
 
-    pass
+    u_grid = np.linspace(-a, a, 200001)
+    x_grid, _ = frame_change(u_grid, trajectory_equation(u_grid))
+
+    return float(np.interp(x_target, x_grid, u_grid))
 
 
 u_min = u_from_x(0)
@@ -119,7 +122,29 @@ def simulation() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     :return t, u, du, ddu : time [s], position [m], speed [m/s] and acceleration [m/s²] along u
     """
-    return None, None, None, None
+
+    t = np.arrange(0, end, step)
+
+    u = np.empty_like(t)
+    du = np.empty_like(t)
+    ddu = np.empty_like(t)
+
+    u[0], du[0] = u_0, du_0
+
+    n = len(t)
+    for i in range(0, len(t) - 1):
+        dt = step
+        ddu[i] = acceleration_equation(u[i], du[i])
+        du[i+1] = du[i] + ddu[i] * dt
+        u[i+1] = u[i] + du[i] * dt
+        ddu[i+1] = ddu[i]
+
+        # Stop the simulation
+        if not (u_min <= u[i] <= u_max):
+            n = i + 1
+            break
+
+    return t[:n], u[:n], du[:n], ddu[:n]
 
 
 
