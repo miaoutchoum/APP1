@@ -84,8 +84,9 @@ def velocity_equation(u: np.ndarray, du: np.ndarray) -> np.ndarray:
     :param du : speeds along u [m/s]
     :return ds : speed of the cable car along the cable, ||dR/dt|| = sqrt(1 + v'²) |du/dt| [m/s]
     """
-
-    pass
+    dv = slope_equation(u)
+    
+    return np.sqrt((1 + dv**2))*abs(du)
 
 def change_of_reference(u: np.ndarray, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
