@@ -82,7 +82,7 @@ def acceleration_equation(u: float, du: float) -> float:
     # ů = du
     
     courbure =  ((dv * ddv) / (1 + dv**2)) * (du**2)
-    frotement_force = (f * du) / m
+    frotement_force = (f_d * du) / m
     gravity_force = ((dv * math.cos(alpha) + math.sin(alpha)) / (1 + (dv**2))) * g
     
     return (-1) * (courbure + frotement_force + gravity_force)
@@ -115,7 +115,7 @@ def u_from_x(x_target: float) -> float:
     """
 
     u_grid = np.linspace(-a, a, 200001)
-    x_grid, _ = frame_change(u_grid, trajectory_equation(u_grid))
+    x_grid, _ = change_of_reference(u_grid, trajectory_equation(u_grid))
 
     return float(np.interp(x_target, x_grid, u_grid))
 
@@ -132,7 +132,7 @@ def simulation() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     :return t, u, du, ddu : time [s], position [m], speed [m/s] and acceleration [m/s²] along u
     """
 
-    t = np.arrange(0, end, step)
+    t = np.arange(0, end, step)
 
     u = np.empty_like(t)
     du = np.empty_like(t)
@@ -167,7 +167,7 @@ def draw_trajectory(x: np.ndarray, y: np.ndarray, color='Black') -> None:
 
     # Full path of the cable car, between the poles
     u_path = np.linspace(u_min, u_max, 2001)
-    x_path, y_path = frame_change(u_path, trajectory_equation(u_path))
+    x_path, y_path = change_of_reference(u_path, trajectory_equation(u_path))
 
     plt.figure(1)
     plt.plot(x_path, y_path, '--', color='Grey', label="Possible path (ellipse)")
