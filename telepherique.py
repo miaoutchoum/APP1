@@ -82,7 +82,7 @@ def acceleration_equation(u: float, du: float) -> float:
     # ů = du
     
     courbure =  ((dv * ddv) / (1 + dv**2)) * (du**2)
-    frotement_force = (f * du) / m
+    frotement_force = (f_d * du) / m
     gravity_force = ((dv * math.cos(alpha) + math.sin(alpha)) / (1 + (dv**2))) * g
     
     return (-1) * (courbure + frotement_force + gravity_force)
