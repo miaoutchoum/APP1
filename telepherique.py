@@ -169,11 +169,11 @@ def draw_trajectory(x: np.ndarray, y: np.ndarray, color='Black') -> None:
     u_path = np.linspace(u_min, u_max, 2001)
     x_path, y_path = change_of_reference(u_path, trajectory_equation(u_path))
 
-    plt.figure(1)
+    plt.figure('Trajectory')
     plt.plot(x_path, y_path, '--', color='Grey', label="Possible path (ellipse)")
     plt.plot(x, y, color=color, label="Simulated positions")
     plt.plot([0, d], [h1, h2], 'ko', label="Anchors P1, P2")
-    plt.plot(x[-1], y[-1], 'o', color='Red', label=f"Final position ({x[-1]:.3f}, {y[-1]:.3f})")
+    plt.plot(x[-1], y[-1], 'o', color='Red', label=f"Final position ({x[-1]:.1f}, {y[-1]:.1f})")
     plt.xlabel("x [m]")
     plt.ylabel("y [m]")
     plt.title("Cable car - trajectory")
@@ -200,15 +200,15 @@ def draw_energy(t: np.ndarray, y: np.ndarray, speed: np.ndarray) -> None:
     :return None:
     """
 
-    # Kinetic and potentiel Energy
+    # Kinetic and potential Energy
     E_kin = 1/2 * m * speed**2
     E_pot = m * g * y
     E_tot = E_kin + E_pot
 
-    plt.figure(2)
+    plt.figure('Energy')
 
     plt.plot(t, E_kin, label='Kinetic Energy', color='Orange')
-    plt.plot(t, E_pot, label='Potentiel Energy', color='Green')
+    plt.plot(t, E_pot, label='Potential Energy', color='Green')
     plt.plot(t, E_tot, label='Total Energy', color='Red')
 
     plt.xlabel("time [s]")
