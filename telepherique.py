@@ -200,7 +200,24 @@ def draw_energy(t: np.ndarray, y: np.ndarray, speed: np.ndarray) -> None:
     :return None:
     """
 
-    pass
+    # Kinetic and potentiel Energy
+    E_kin = 1/2 * m * speed**2
+    E_pot = m * g * y
+    E_tot = E_kin + E_pot
+
+    plt.figure(2)
+
+    plt.plot(t, E_kin, label='Kinetic Energy', color='Orange')
+    plt.plot(t, E_pot, label='Potentiel Energy', color='Green')
+    plt.plot(t, E_tot, label='Total Energy', color='Red')
+
+    plt.xlabel("time [s]")
+    plt.ylabel("Energy [J]")
+    plt.title("Cable car - energy")
+    plt.grid(True)
+    plt.axis("equal")
+    plt.legend()
+    plt.show()
 
 
 
@@ -219,3 +236,4 @@ if __name__ == "__main__":
     # 3. Graphics
     draw_trajectory(x, y, color='Blue')
     draw_position_velocity(t, x, y, speed, color='Black')
+    draw_energy(t, y, speed)
