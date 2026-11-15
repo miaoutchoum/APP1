@@ -95,7 +95,7 @@ def velocity_equation(u: np.ndarray, du: np.ndarray) -> np.ndarray:
     """
     dv = slope_equation(u)
     
-    return np.sqrt((1 + dv**2))*abs(du)
+    return np.sqrt((1 + dv**2))*du
 
 def change_of_reference(u: np.ndarray, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -149,7 +149,7 @@ def simulation() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         ddu[i+1] = ddu[i]
 
         # Stop the simulation
-        if not (u_min <= u[i] <= u_max):
+        if not (u_min <= u[i+1] <= u_max):
             n = i + 1
             break
 
@@ -158,7 +158,7 @@ def simulation() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
 
 ###  Graphics code  ###
-def draw_trajectory(x: np.ndarray, y: np.ndarray, color='Black') -> None:
+def draw_trajectory(x: np.ndarray, y: np.ndarray, color: str='Black') -> None:
     """
     :param x, y : simulated positions [m]
     :param color : color of the simulated positions
@@ -219,6 +219,25 @@ def draw_energy(t: np.ndarray, y: np.ndarray, speed: np.ndarray) -> None:
     plt.legend()
     plt.show()
 
+def draw_phase_space(x: np.ndarray, speed: np.ndarray, color: str='Black') -> None:
+    """
+    Draw the phase space for the cable-car.
+    :param y:
+    :param speed:
+    :return:
+    """
+    plt.figure('Phase Space')
+
+    plt.plot(x, speed, color=color, linewidth=2, label='Phase Graph')
+    plt.plot(x[-1], speed[-1], 'ko', label='End')
+
+    plt.xlabel('x [m]')
+    plt.ylabel('speed [m/s]')
+
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
 
 
 
@@ -235,5 +254,6 @@ if __name__ == "__main__":
 
     # 3. Graphics
     draw_trajectory(x, y, color='Blue')
-    draw_position_velocity(t, x, y, speed, color='Black')
-    draw_energy(t, y, speed)
+    draw_position_velocity(t, x, y, abs(speed), color='Black')
+    draw_energy(t, y, abs(speed))
+    draw_phase_space(x, speed, color='Red')
