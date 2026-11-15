@@ -231,6 +231,7 @@ def draw_phase_space(x: np.ndarray, speed: np.ndarray, color: str='Black') -> No
     plt.plot(x, speed, color=color, linewidth=2, label='Phase Graph')
     plt.plot(x[-1], speed[-1], 'ko', label='End')
 
+    plt.title("Cable car - phase space")
     plt.xlabel('x [m]')
     plt.ylabel('speed [m/s]')
 
