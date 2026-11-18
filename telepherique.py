@@ -201,22 +201,29 @@ def draw_energy(t: np.ndarray, y: np.ndarray, speed: np.ndarray) -> None:
     """
 
     # Kinetic and potential Energy
-    E_kin = 1/2 * m * speed**2
-    E_pot = m * g * y
-    E_tot = E_kin + E_pot
+    e_kin = 1/2 * m * speed**2
+    e_pot = m * g * y
+    e_tot = e_kin + e_pot
+
+    efficiency = e_tot / e_tot[0] * 100
 
     plt.figure('Energy')
-
-    plt.plot(t, E_kin, label='Kinetic Energy', color='Orange')
-    plt.plot(t, E_pot, label='Potential Energy', color='Green')
-    plt.plot(t, E_tot, label='Total Energy', color='Red')
-
+    plt.plot(t, e_kin, label='Kinetic Energy', color='Orange')
+    plt.plot(t, e_pot, label='Potential Energy', color='Green')
+    plt.plot(t, e_tot, label='Total Energy', color='Red')
     plt.xlabel("time [s]")
     plt.ylabel("Energy [J]")
     plt.title("Cable car - energy")
     plt.grid(True)
-    plt.axis("equal")
     plt.legend()
+    plt.show()
+
+    plt.figure('Efficiency')
+    plt.plot(t[0:], efficiency, color='Blue')
+    plt.xlabel("time [s]")
+    plt.ylabel("Efficiency [%]")
+    plt.title("Cable car - Efficiency")
+    plt.grid(True)
     plt.show()
 
 def draw_phase_space(x: np.ndarray, speed: np.ndarray, color: str='Black') -> None:
