@@ -30,7 +30,7 @@ f_d = 0.1                          # friction coefficient [kg/s]
 
 # Simulation
 step = 0.001                       # time step dt [s]
-end = 60.0                         # duration [s]
+end = 20.0                         # duration [s]
 x_0 = 0.0                          # initial horizontal position [m]
 du_0 = 0.0                         # initial speed [m/s]
 
@@ -205,7 +205,14 @@ def draw_energy(t: np.ndarray, y: np.ndarray, speed: np.ndarray) -> None:
     e_pot = m * g * y
     e_tot = e_kin + e_pot
 
-    efficiency = e_tot / e_tot[0] * 100
+    efficiency = []
+    for i in range(len(t) - 1):
+        d_kin = e_kin[i + 1] - e_kin[i]
+        d_pot = e_pot[i + 1] - e_pot[i]
+        if d_pot != 0:
+            efficiency.append(d_kin / -d_pot)
+        else:
+            efficiency.append(0)
 
     plt.figure('Energy')
     plt.plot(t, e_kin, label='Kinetic Energy', color='Orange')
@@ -219,11 +226,13 @@ def draw_energy(t: np.ndarray, y: np.ndarray, speed: np.ndarray) -> None:
     plt.show()
 
     plt.figure('Efficiency')
-    plt.plot(t[0:], efficiency, color='Blue')
+    plt.plot(t[1:], efficiency, color='Blue', label='Efficiency')
     plt.xlabel("time [s]")
-    plt.ylabel("Efficiency [%]")
-    plt.title("Cable car - Efficiency")
+    plt.ylabel("Efficiency [-]")
+    plt.ylim((0, 1))
+    plt.title("Cable car - efficiency")
     plt.grid(True)
+    plt.legend()
     plt.show()
 
 def draw_phase_space(x: np.ndarray, speed: np.ndarray, color: str='Black') -> None:
