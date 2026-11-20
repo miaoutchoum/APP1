@@ -206,17 +206,6 @@ def draw_trajectory(x: np.ndarray, y: np.ndarray, mesure_x: np.ndarray, mesure_y
     plt.legend()
     plt.show()
 
-def draw_position_velocity(t: np.ndarray, x: np.ndarray, y: np.ndarray, speed: np.ndarray, color='Black') -> None:
-    """
-    :param t : time [s]
-    :param x, y : positions [m]
-    :param speed : speed along the cable [m/s]
-    :param color : color of the simulated curves
-    :return None:
-    """
-
-    pass
-
 def draw_energy(t: np.ndarray, y: np.ndarray, speed: np.ndarray) -> None:
     """
     Check of the simulation: the total energy must decrease (friction)
