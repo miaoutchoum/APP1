@@ -35,8 +35,7 @@ x_0 = 0.0                          # initial horizontal position [m]
 du_0 = 0.0                         # initial speed [m/s]
 
 # Tracker file
-#DATA_FILENAME = "data/data.csv"
-DATA_FILENAME = "others/epl_simulation/descente.csv"
+DATA_FILENAME = "data/tracker_data_3.txt"
 
 ###  Physics code  ###
 def trajectory_equation(interval: np.ndarray) -> np.ndarray:
@@ -161,8 +160,14 @@ def simulation() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
 ### Tracker manager ###
 def read_tracker(filename: str) -> tuple:
-    (mesure_t, mesure_x, mesure_y) = np.loadtxt(filename, skiprows=2, delimiter=';', usecols=(0, 1, 2), max_rows=56,
-           converters=lambda s: float(s.replace(',', '.'))).T
+    data = []
+    with open(filename) as file:
+        for line in file.readlines()[2:]:
+            values = line.replace(',', '.').split()
+            if len(values) == 3:
+                data.append([float(v) for v in values])
+
+    (mesure_t, mesure_x, mesure_y) = np.array(data).T
 
     mesure_t = mesure_t - mesure_t[0]
 
@@ -172,6 +177,11 @@ def read_tracker(filename: str) -> tuple:
 
     return mesure_t, mesure_x, mesure_y, mesure_v
 
+def align_mesure(mesure_x: np.ndarray, mesure_y: np.ndarray, x: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    mesure_x = -(mesure_x - mesure_x[0]) + x[0]
+    mesure_y = mesure_y - mesure_y[0] + y[0]
+
+    return mesure_x, mesure_y
 
 
 ###  Graphics code  ###
@@ -285,7 +295,10 @@ if __name__ == "__main__":
     x, y = change_of_reference(u, v)
     speed = velocity_equation(u, du)
 
-    # 4. Graphics
+    # 4. Align the Tracker data on the simulation
+    mesure_x, mesure_y = align_mesure(mesure_x, mesure_y, x, y)
+
+    # 5. Graphics
     draw_trajectory(x, y, mesure_x, mesure_y, color='Blue', show_mesure=True)
     draw_position_velocity(t, x, y, abs(speed), color='Black')
     draw_energy(t, y, abs(speed))
