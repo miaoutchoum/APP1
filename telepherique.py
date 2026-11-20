@@ -34,6 +34,9 @@ end = 20.0                         # duration [s]
 x_0 = 0.0                          # initial horizontal position [m]
 du_0 = 0.0                         # initial speed [m/s]
 
+# Tracker file
+#DATA_FILENAME = "data/data.csv"
+DATA_FILENAME = "others/epl_simulation/descente.csv"
 
 ###  Physics code  ###
 def trajectory_equation(interval: np.ndarray) -> np.ndarray:
@@ -158,17 +161,21 @@ def simulation() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
 ### Tracker manager ###
 def read_tracker(filename: str) -> tuple:
-    (mesure_t, mesure_x, mesure_y, mesure_v) = np.loadtxt(filename, skiprows=2).T
+    (mesure_t, mesure_x, mesure_y) = np.loadtxt(filename, skiprows=2, delimiter=';', usecols=(0, 1, 2), max_rows=56,
+           converters=lambda s: float(s.replace(',', '.'))).T
 
-    # Faire commencer le temps à 0, comme dans la simulation
     mesure_t = mesure_t - mesure_t[0]
+
+    mesure_vx = np.gradient(mesure_x, mesure_t)
+    mesure_vy = np.gradient(mesure_y, mesure_t)
+    mesure_v = np.sqrt(mesure_vx**2 + mesure_vy**2)
 
     return mesure_t, mesure_x, mesure_y, mesure_v
 
 
 
 ###  Graphics code  ###
-def draw_trajectory(x: np.ndarray, y: np.ndarray, color: str='Black') -> None:
+def draw_trajectory(x: np.ndarray, y: np.ndarray, mesure_x: np.ndarray, mesure_y: np.ndarray, color: str='Black') -> None:
     """
     :param x, y : simulated positions [m]
     :param color : color of the simulated positions
@@ -179,11 +186,17 @@ def draw_trajectory(x: np.ndarray, y: np.ndarray, color: str='Black') -> None:
     u_path = np.linspace(u_min, u_max, 2001)
     x_path, y_path = change_of_reference(u_path, trajectory_equation(u_path))
 
+    # Simulation
     plt.figure('Trajectory')
     plt.plot(x_path, y_path, '--', color='Grey', label="Possible path (ellipse)")
     plt.plot(x, y, color=color, label="Simulated positions")
     plt.plot([0, d], [h1, h2], 'ko', label="Anchors P1, P2")
     plt.plot(x[-1], y[-1], 'o', color='Red', label=f"Final position ({x[-1]:.1f}, {y[-1]:.1f})")
+
+    # Tracker data
+    plt.plot(mesure_x, mesure_y, '-', color='Black', label="Mesure graph")
+    plt.scatter(mesure_x, mesure_y, color='Black', label="Mesure point")
+
     plt.xlabel("x [m]")
     plt.ylabel("y [m]")
     plt.title("Cable car - trajectory")
@@ -274,13 +287,16 @@ if __name__ == "__main__":
     # 1. Solve the equation of motion along u
     t, u, du, ddu = simulation()
 
-    # 2. Back to the real frame and speed along the cable
+    # 2. Tracker mesures
+    mesure_t, mesure_x, mesure_y, mesure_v = read_tracker(filename=DATA_FILENAME)
+
+    # 3. Back to the real frame and speed along the cable
     v = trajectory_equation(u)
     x, y = change_of_reference(u, v)
     speed = velocity_equation(u, du)
 
-    # 3. Graphics
-    draw_trajectory(x, y, color='Blue')
+    # 4. Graphics
+    draw_trajectory(x, y, mesure_x, mesure_y, color='Blue')
     draw_position_velocity(t, x, y, abs(speed), color='Black')
     draw_energy(t, y, abs(speed))
     draw_phase_space(x, speed, color='Red')
