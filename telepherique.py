@@ -156,6 +156,16 @@ def simulation() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     return t[:n], u[:n], du[:n], ddu[:n]
 
 
+### Tracker manager ###
+def read_tracker(filename: str) -> tuple:
+    (mesure_t, mesure_x, mesure_y, mesure_v) = np.loadtxt(filename, skiprows=2).T
+
+    # Faire commencer le temps à 0, comme dans la simulation
+    mesure_t = mesure_t - mesure_t[0]
+
+    return mesure_t, mesure_x, mesure_y, mesure_v
+
+
 
 ###  Graphics code  ###
 def draw_trajectory(x: np.ndarray, y: np.ndarray, color: str='Black') -> None:
