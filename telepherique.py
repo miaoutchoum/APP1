@@ -175,7 +175,7 @@ def read_tracker(filename: str) -> tuple:
 
 
 ###  Graphics code  ###
-def draw_trajectory(x: np.ndarray, y: np.ndarray, mesure_x: np.ndarray, mesure_y: np.ndarray, color: str='Black') -> None:
+def draw_trajectory(x: np.ndarray, y: np.ndarray, mesure_x: np.ndarray, mesure_y: np.ndarray, color: str='Black', show_mesure: bool=False) -> None:
     """
     :param x, y : simulated positions [m]
     :param color : color of the simulated positions
@@ -194,8 +194,9 @@ def draw_trajectory(x: np.ndarray, y: np.ndarray, mesure_x: np.ndarray, mesure_y
     plt.plot(x[-1], y[-1], 'o', color='Red', label=f"Final position ({x[-1]:.1f}, {y[-1]:.1f})")
 
     # Tracker data
-    plt.plot(mesure_x, mesure_y, '-', color='Black', label="Mesure graph")
-    plt.scatter(mesure_x, mesure_y, color='Black', label="Mesure point")
+    if show_mesure:
+        plt.plot(mesure_x, mesure_y, '-', color='yellow', label="Mesure graph", zorder=3)
+        plt.scatter(mesure_x, mesure_y, color='orange', label="Mesure point", s=5, zorder=4)
 
     plt.xlabel("x [m]")
     plt.ylabel("y [m]")
@@ -296,7 +297,7 @@ if __name__ == "__main__":
     speed = velocity_equation(u, du)
 
     # 4. Graphics
-    draw_trajectory(x, y, mesure_x, mesure_y, color='Blue')
+    draw_trajectory(x, y, mesure_x, mesure_y, color='Blue', show_mesure=True)
     draw_position_velocity(t, x, y, abs(speed), color='Black')
     draw_energy(t, y, abs(speed))
     draw_phase_space(x, speed, color='Red')
