@@ -205,8 +205,8 @@ def draw_trajectory(x: np.ndarray, y: np.ndarray, mesure_x: np.ndarray, mesure_y
 
     # Tracker data
     if show_mesure:
-        plt.plot(mesure_x, mesure_y, '-', color='yellow', label="Mesure graph", zorder=3)
-        plt.scatter(mesure_x, mesure_y, color='orange', label="Mesure point", s=5, zorder=4)
+        plt.plot(mesure_x, mesure_y, '-', color='orange', label="Mesure graph", zorder=3)
+        plt.scatter(mesure_x, mesure_y, color='orange', label="Mesure point", s=10, zorder=4)
 
     plt.xlabel("x [m]")
     plt.ylabel("y [m]")
@@ -300,6 +300,5 @@ if __name__ == "__main__":
 
     # 5. Graphics
     draw_trajectory(x, y, mesure_x, mesure_y, color='Blue', show_mesure=True)
-    draw_position_velocity(t, x, y, abs(speed), color='Black')
     draw_energy(t, y, abs(speed))
     draw_phase_space(x, speed, color='Red')
